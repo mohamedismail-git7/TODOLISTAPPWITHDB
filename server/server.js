@@ -1,13 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/todoDB')
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB Connected Successfully'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
@@ -47,7 +49,7 @@ app.delete('/todos/:id', async (req, res) => {
 // ✅ Export the app instead of listening (for Vercel)
 if (require.main === module) {
   // Only run this when executing locally
-  const PORT = 5000;
+  const PORT = 3000;
   app.listen(PORT, () => {
     console.log(`🚀 Server is running at: http://localhost:${PORT}/`);
   });
