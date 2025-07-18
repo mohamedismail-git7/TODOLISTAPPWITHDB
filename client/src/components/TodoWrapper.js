@@ -6,7 +6,7 @@ import axios from 'axios';
 
 export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]);
-  const endpoint="http://localhost:3000"
+  const endpoint="https://todolistbackend-ten.vercel.app/"
   useEffect(() => {
     axios.get(endpoint +'/todos')
       .then(res => {
