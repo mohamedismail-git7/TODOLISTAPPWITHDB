@@ -44,8 +44,14 @@ app.delete('/todos/:id', async (req, res) => {
   res.json({ message: 'Todo Deleted Successfully' });
 });
 
-// Start Server
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running at: http://localhost:${PORT}/`);
-});
+// ✅ Export the app instead of listening (for Vercel)
+if (require.main === module) {
+  // Only run this when executing locally
+  const PORT = 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running at: http://localhost:${PORT}/`);
+  });
+} else {
+  module.exports = app; // Used by Vercel
+}
+
