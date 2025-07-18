@@ -6,9 +6,9 @@ import axios from 'axios';
 
 export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]);
-
+  const endpoint="http://localhost:3000"
   useEffect(() => {
-    axios.get('/todos')
+    axios.get(endpoint +'/todos')
       .then(res => {
         console.log('✅ Todos fetched:', res.data);
         setTodos(res.data);
@@ -17,20 +17,20 @@ export const TodoWrapper = () => {
   }, []);
 
   const addTodo = (task) => {
-    axios.post('/todos', { task })
+    axios.post(endpoint +'/todos', { task })
       .then(res => setTodos([...todos, res.data]))
       .catch(err => console.error('❌ Add Error:', err));
   };
 
   const deleteTodo = (id) => {
-    axios.delete(`/todos/${id}`)
+    axios.delete(endpoint +`/todos/${id}`)
       .then(() => setTodos(todos.filter(t => t._id !== id)))
       .catch(err => console.error('❌ Delete Error:', err));
   };
 
   const togglecomplete = (id) => {
     const todo = todos.find(t => t._id === id);
-    axios.put(`/todos/${id}`, { completed: !todo.completed })
+    axios.put(endpoint +`/todos/${id}`, { completed: !todo.completed })
       .then(res => setTodos(todos.map(t => t._id === id ? res.data : t)))
       .catch(err => console.error('❌ Toggle Complete Error:', err));
   };
@@ -40,7 +40,7 @@ export const TodoWrapper = () => {
   };
 
   const editTask = (task, id) => {
-    axios.put(`/todos/${id}`, { task })
+    axios.put(endpoint +`/todos/${id}`, { task })
       .then(res => setTodos(todos.map(t => t._id === id ? { ...res.data, isEditing: false } : t)))
       .catch(err => console.error('❌ Edit Task Error:', err));
   };
