@@ -8,7 +8,7 @@ export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]);
   const endpoint="https://0ygb0enhte.execute-api.ap-south-1.amazonaws.com/default/todos"
   useEffect(() => {
-    axios.get(endpoint +'/todos')
+    axios.get(endpoint)
       .then(res => {
         console.log('✅ Todos fetched:', res.data);
         setTodos(res.data);
