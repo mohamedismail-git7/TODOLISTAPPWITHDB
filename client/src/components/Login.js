@@ -1,28 +1,51 @@
 import React, { useState } from 'react';
+import { supabase } from './supabaseClient';
 
 export const Login = ({ onLogin }) => {
-  const [userId, setUserId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false); // toggle sign-up/login
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (userId === 'ismail' && password === '1234') {
-      onLogin();
+    if (isSignUp) {
+      // 🔐 Sign-Up
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert('❌ Sign up failed: ' + error.message);
+      } else {
+        alert('✅ Sign up successful! Please log in.');
+        setIsSignUp(false); // switch to login
+      }
     } else {
-      alert('❌ Invalid credentials. Try admin / 1234');
+      // 🔓 Login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert('❌ Login failed: ' + error.message);
+      } else {
+        onLogin(); // only after login
+      }
     }
   };
 
   return (
     <div className="login-wrapper">
-      <h2>Login</h2>
+      <h2>{isSignUp ? 'Sign Up' : 'Login'}</h2>
       <form onSubmit={handleSubmit}>
         <input
-          type="text"
-          placeholder="User ID"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <br />
@@ -34,8 +57,18 @@ export const Login = ({ onLogin }) => {
           required
         />
         <br />
-        <button type="submit">Login</button>
+        <button type="submit">{isSignUp ? 'Create Account' : 'Login'}</button>
       </form>
+
+      <p style={{ marginTop: '10px' }}>
+        {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+        <button
+          onClick={() => setIsSignUp(!isSignUp)}
+          style={{ background: 'none', border: 'none', color: 'blue', cursor: 'pointer' }}
+        >
+          {isSignUp ? 'Login here' : 'Sign up here'}
+        </button>
+      </p>
     </div>
   );
 };
