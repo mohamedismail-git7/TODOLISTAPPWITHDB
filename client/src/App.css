@@ -88,4 +88,47 @@ h1 {
 .edit-icon,
 .delete-icon {
   cursor: pointer;
+} 
+.login-wrapper {
+  background: #222222;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 350px;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.login-wrapper h2 {
+  color: #fff;
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+.login-wrapper input {
+  outline: none;
+  background: none;
+  border: 1px solid #28a181;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0;
+  width: 100%;
+  color: #fff;
+}
+
+.login-wrapper input::placeholder {
+  color: #d3d3d3;
+}
+
+.login-wrapper button {
+  background: #2b7952;
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.login-wrapper button:hover {
+  background: #246746;
 }
