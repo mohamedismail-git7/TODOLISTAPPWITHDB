@@ -40,7 +40,9 @@ export const TodoWrapper = ({ userId }) => {
   // ❌ Delete todo
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/todos/${id}`);
+      await axios.delete(`${BASE_URL}/todos/${id}`, {
+        data: { userEmail: userId } // ✅ Include userEmail here
+      });
       setTodos(todos.filter(t => t._id !== id));
     } catch (err) {
       console.error('❌ Delete Error:', err.response?.data?.message || err.message);
@@ -52,7 +54,8 @@ export const TodoWrapper = ({ userId }) => {
     try {
       const todo = todos.find(t => t._id === id);
       const res = await axios.put(`${BASE_URL}/todos/${id}`, {
-        completed: !todo.completed
+        completed: !todo.completed,
+        userEmail: userId // ✅ Include userEmail here
       });
       setTodos(todos.map(t => t._id === id ? res.data : t));
     } catch (err) {
@@ -69,7 +72,8 @@ export const TodoWrapper = ({ userId }) => {
   const editTask = async (task, id) => {
     try {
       const res = await axios.put(`${BASE_URL}/todos/${id}`, {
-        task
+        task,
+        userEmail: userId // ✅ Include userEmail here
       });
       setTodos(todos.map(t => t._id === id ? { ...res.data, isEditing: false } : t));
     } catch (err) {
