@@ -2,101 +2,108 @@ import React, { useState, useEffect } from 'react';
 import { TodoForm } from './TodoForm';
 import { Todo } from './Todo';
 import { EditTodoForm } from './EditTodoForm';
+import axios from 'axios';
 
-const BASE_URL = "https://0ygb0enhte.execute-api.ap-south-1.amazonaws.com/default/todos";
+const BASE_URL = 'https://0ygb0enhte.execute-api.ap-south-1.amazonaws.com/default/todos';
 
-export const TodoWrapper = ({ userEmail }) => {
+export const TodoWrapper = ({ userId }) => {
   const [todos, setTodos] = useState([]);
-  const [editingTodo, setEditingTodo] = useState(null);
 
-  // Fetch todos on load
+  // 🔁 Fetch todos for this user using POST
   useEffect(() => {
-    if (userEmail) {
-      fetch(`${BASE_URL}?userEmail=${userEmail}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setTodos(data);
-          }
-        })
-        .catch(err => console.error("Error fetching todos:", err));
+    const fetchTodos = async () => {
+      if (!userId) return;
+      try {
+        const res = await axios.post(BASE_URL, {
+          userEmail: userId
+        });
+        console.log('✅ Todos fetched:', res.data);
+        setTodos(res.data.todos || res.data); // Supports both res.data.todos or res.data
+      } catch (err) {
+        console.error('❌ Fetch Error:', err.response?.data?.message || err.message);
+      }
+    };
+
+    fetchTodos();
+  }, [userId]);
+
+  // ➕ Add todo
+  const addTodo = async (task) => {
+    try {
+      const res = await axios.post(BASE_URL, {
+        task,
+        completed: false,
+        userEmail: userId
+      });
+      setTodos([...todos, res.data]);
+    } catch (err) {
+      console.error('❌ Add Error:', err.response?.data?.message || err.message);
     }
-  }, [userEmail]);
-
-  // Add new todo
-  const addTodo = task => {
-    fetch(BASE_URL, {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task, userEmail })
-    })
-      .then(res => res.json())
-      .then(newTodo => setTodos([...todos, newTodo]))
-      .catch(err => console.error("Error adding todo:", err));
   };
 
-  // Delete a todo
-  const deleteTodo = id => {
-    fetch(`${BASE_URL}/${id}`, {
-      method: "DELETE"
-    })
-      .then(res => res.json())
-      .then(() => setTodos(todos.filter(todo => todo._id !== id)))
-      .catch(err => console.error("Error deleting todo:", err));
+  // ❌ Delete todo
+  const deleteTodo = async (id) => {
+    try {
+      await axios.delete(BASE_URL, {
+        data: {
+          id,
+          userEmail: userId
+        }
+      });
+      setTodos(todos.filter(t => t._id !== id));
+    } catch (err) {
+      console.error('❌ Delete Error:', err.response?.data?.message || err.message);
+    }
   };
 
-  // Toggle complete
-  const toggleComplete = id => {
-    const todo = todos.find(t => t._id === id);
-    if (!todo) return;
-
-    fetch(`${BASE_URL}/${id}`, {
-      method: "PUT",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ completed: !todo.completed })
-    })
-      .then(res => res.json())
-      .then(updated => {
-        setTodos(todos.map(t => (t._id === id ? { ...t, completed: updated.completed } : t)));
-      })
-      .catch(err => console.error("Error updating todo:", err));
+  // ✅ Toggle complete
+  const togglecomplete = async (id) => {
+    try {
+      const todo = todos.find(t => t._id === id);
+      const res = await axios.put(BASE_URL, {
+        id,
+        completed: !todo.completed,
+        userEmail: userId
+      });
+      setTodos(todos.map(t => t._id === id ? res.data : t));
+    } catch (err) {
+      console.error('❌ Toggle Complete Error:', err.response?.data?.message || err.message);
+    }
   };
 
-  // Update todo
-  const editTask = (id, newTask) => {
-    fetch(`${BASE_URL}/${id}`, {
-      method: "PUT",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task: newTask })
-    })
-      .then(res => res.json())
-      .then(updated => {
-        setTodos(todos.map(todo => (todo._id === id ? updated : todo)));
-        setEditingTodo(null);
-      })
-      .catch(err => console.error("Error editing todo:", err));
+  // ✏️ Toggle edit mode
+  const editTodo = (id) => {
+    setTodos(todos.map(t => t._id === id ? { ...t, isEditing: !t.isEditing } : t));
+  };
+
+  // 💾 Save edited task
+  const editTask = async (task, id) => {
+    try {
+      const res = await axios.put(BASE_URL, {
+        id,
+        task,
+        userEmail: userId
+      });
+      setTodos(todos.map(t => t._id === id ? { ...res.data, isEditing: false } : t));
+    } catch (err) {
+      console.error('❌ Edit Task Error:', err.response?.data?.message || err.message);
+    }
   };
 
   return (
     <div className="TodoWrapper">
-      <h1>My Todo List</h1>
+      <h1>GET THINGS DONE!</h1>
       <TodoForm addTodo={addTodo} />
-
-      {todos.map(todo =>
-        editingTodo === todo._id ? (
-          <EditTodoForm
-            key={todo._id}
-            editTodo={editTask}
-            task={todo}
-            cancelEdit={() => setEditingTodo(null)}
-          />
+      {todos.map((todo) =>
+        todo.isEditing ? (
+          <EditTodoForm editTodo={editTask} task={todo} key={todo._id} />
         ) : (
           <Todo
-            key={todo._id}
             task={todo}
-            toggleComplete={toggleComplete}
+            key={todo._id}
+            togglecomplete={togglecomplete}
             deleteTodo={deleteTodo}
-            editTodo={() => setEditingTodo(todo._id)}
+            editTodo={editTodo}
           />
         )
       )}
