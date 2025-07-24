@@ -2,63 +2,101 @@ import React, { useState, useEffect } from 'react';
 import { TodoForm } from './TodoForm';
 import { Todo } from './Todo';
 import { EditTodoForm } from './EditTodoForm';
-import axios from 'axios';
 
-export const TodoWrapper = () => {
+const BASE_URL = "https://0ygb0enhte.execute-api.ap-south-1.amazonaws.com/default/todos";
+
+export const TodoWrapper = ({ userEmail }) => {
   const [todos, setTodos] = useState([]);
-  const endpoint="https://0ygb0enhte.execute-api.ap-south-1.amazonaws.com/default/todos"
+  const [editingTodo, setEditingTodo] = useState(null);
+
+  // Fetch todos on load
   useEffect(() => {
-    axios.get(endpoint)
-      .then(res => {
-        console.log('✅ Todos fetched:', res.data);
-        setTodos(res.data);
-      })
-      .catch(err => console.error('❌ Fetch Error:', err));
-  }, []);
+    if (userEmail) {
+      fetch(`${BASE_URL}?userEmail=${userEmail}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setTodos(data);
+          }
+        })
+        .catch(err => console.error("Error fetching todos:", err));
+    }
+  }, [userEmail]);
 
-  const addTodo = (task) => {
-    axios.post(endpoint, { task })
-      .then(res => setTodos([...todos, res.data]))
-      .catch(err => console.error('❌ Add Error:', err));
+  // Add new todo
+  const addTodo = task => {
+    fetch(BASE_URL, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task, userEmail })
+    })
+      .then(res => res.json())
+      .then(newTodo => setTodos([...todos, newTodo]))
+      .catch(err => console.error("Error adding todo:", err));
   };
 
-  const deleteTodo = (id) => {
-    axios.delete(endpoint +`/${id}`)
-      .then(() => setTodos(todos.filter(t => t._id !== id)))
-      .catch(err => console.error('❌ Delete Error:', err));
+  // Delete a todo
+  const deleteTodo = id => {
+    fetch(`${BASE_URL}/${id}`, {
+      method: "DELETE"
+    })
+      .then(res => res.json())
+      .then(() => setTodos(todos.filter(todo => todo._id !== id)))
+      .catch(err => console.error("Error deleting todo:", err));
   };
 
-  const togglecomplete = (id) => {
+  // Toggle complete
+  const toggleComplete = id => {
     const todo = todos.find(t => t._id === id);
-    axios.put(endpoint +`/${id}`, { completed: !todo.completed })
-      .then(res => setTodos(todos.map(t => t._id === id ? res.data : t)))
-      .catch(err => console.error('❌ Toggle Complete Error:', err));
+    if (!todo) return;
+
+    fetch(`${BASE_URL}/${id}`, {
+      method: "PUT",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: !todo.completed })
+    })
+      .then(res => res.json())
+      .then(updated => {
+        setTodos(todos.map(t => (t._id === id ? { ...t, completed: updated.completed } : t)));
+      })
+      .catch(err => console.error("Error updating todo:", err));
   };
 
-  const editTodo = (id) => {
-    setTodos(todos.map(t => t._id === id ? { ...t, isEditing: !t.isEditing } : t));
-  };
-
-  const editTask = (task, id) => {
-    axios.put(endpoint +`/${id}`, { task })
-      .then(res => setTodos(todos.map(t => t._id === id ? { ...res.data, isEditing: false } : t)))
-      .catch(err => console.error('❌ Edit Task Error:', err));
+  // Update todo
+  const editTask = (id, newTask) => {
+    fetch(`${BASE_URL}/${id}`, {
+      method: "PUT",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: newTask })
+    })
+      .then(res => res.json())
+      .then(updated => {
+        setTodos(todos.map(todo => (todo._id === id ? updated : todo)));
+        setEditingTodo(null);
+      })
+      .catch(err => console.error("Error editing todo:", err));
   };
 
   return (
     <div className="TodoWrapper">
-      <h1>GET THINGS DONE!</h1>
+      <h1>My Todo List</h1>
       <TodoForm addTodo={addTodo} />
-      {todos.map((todo) =>
-        todo.isEditing ? (
-          <EditTodoForm editTodo={editTask} task={todo} key={todo._id} />
+
+      {todos.map(todo =>
+        editingTodo === todo._id ? (
+          <EditTodoForm
+            key={todo._id}
+            editTodo={editTask}
+            task={todo}
+            cancelEdit={() => setEditingTodo(null)}
+          />
         ) : (
           <Todo
-            task={todo}
             key={todo._id}
-            togglecomplete={togglecomplete}
+            task={todo}
+            toggleComplete={toggleComplete}
             deleteTodo={deleteTodo}
-            editTodo={editTodo}
+            editTodo={() => setEditingTodo(todo._id)}
           />
         )
       )}

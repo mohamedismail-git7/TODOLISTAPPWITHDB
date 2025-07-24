@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
+/* Global Reset */
 * {
   font-family: 'Poppins', sans-serif;
   margin: 0;
@@ -8,12 +9,13 @@
 }
 
 body {
-  background:#000000;
+  background: #000000;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/* App Container */
 .App {
   text-align: center;
 }
@@ -24,6 +26,7 @@ h1 {
   font-size: 1.75rem;
 }
 
+/* Todo Wrapper */
 .TodoWrapper {
   background: #222222;
   margin-top: 5rem;
@@ -31,6 +34,7 @@ h1 {
   border-radius: 10px;
 }
 
+/* Todo Form */
 .TodoForm {
   width: 100%;
   margin-bottom: 1rem;
@@ -54,11 +58,18 @@ h1 {
 .todo-btn {
   background: #2b7952;
   color: #fff;
-  border: 5px;
-  padding: 0.55rem;
+  border: none;
+  padding: 0.55rem 1.2rem;
   cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
 }
 
+.todo-btn:hover {
+  background: #246746;
+}
+
+/* Todo Item */
 .Todo {
   display: flex;
   justify-content: space-between;
@@ -88,7 +99,9 @@ h1 {
 .edit-icon,
 .delete-icon {
   cursor: pointer;
-} 
+}
+
+/* Login Wrapper */
 .login-wrapper {
   background: #222222;
   padding: 2rem;
@@ -112,6 +125,7 @@ h1 {
   margin: 0.5rem 0;
   width: 100%;
   color: #fff;
+  border-radius: 5px;
 }
 
 .login-wrapper input::placeholder {
@@ -127,8 +141,34 @@ h1 {
   cursor: pointer;
   width: 100%;
   border-radius: 5px;
+  transition: background 0.3s ease;
 }
 
 .login-wrapper button:hover {
   background: #246746;
+}
+
+/* Toggle Text */
+.login-toggle-text {
+  color: #8B4513; /* dark brown */
+  margin-top: 1rem;
+  font-weight: 500;
+}
+
+/* Toggle Auth Button (Sign up/Login toggle link) */
+.login-toggle-link {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 2px solid #2b7952;
+  color: #2b7952;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.login-toggle-link:hover {
+  background-color: #2b7952;
+  color: #fff;
 }
