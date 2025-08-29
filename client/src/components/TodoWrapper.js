@@ -4,7 +4,7 @@ import { Todo } from './Todo';
 import { EditTodoForm } from './EditTodoForm';
 import axios from 'axios';
 
-const BASE_URL = 'https://hydxtsla80.execute-api.ap-south-1.amazonaws.com/default';
+const BASE_URL = 'https://todolistbackend-ten.vercel.app/todos';
 
 export const TodoWrapper = ({ userId }) => {
   const [todos, setTodos] = useState([]);
